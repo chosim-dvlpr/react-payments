@@ -1,9 +1,63 @@
 import { css } from '@emotion/react';
 import { MASTERCARD, VISA } from '../assets';
 import { isRange } from '../util/isRange';
-import { CARD_INFORMATION } from '../constants/cardInformation';
-import { cardBrand, CardBrandType } from '../types/cardType';
 import { VALIDATION } from '../constants/validation';
+import checkCardBrand from '../util/checkCardBrand';
+import formatCardDisplayNumber from '../util/formatCardDisplayNumber';
+import { CARD_DISPLAY_INDEX } from '../constants/cardInformation';
+
+const cardContainerStyle = css({
+  backgroundColor: '#333333',
+  width: '212px',
+  height: '132px',
+  borderRadius: '4px',
+  boxSizing: 'border-box',
+  boxShadow: '3px 3px 5px 0px',
+  padding: '8px 12px',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '14px',
+  margin: '0 auto',
+});
+
+const cardHeaderStyle = css({
+  display: 'flex',
+  justifyContent: 'space-between',
+});
+
+const cardIcStyle = css({
+  backgroundColor: '#ddcd78',
+  borderRadius: '4px',
+  width: '36px',
+  height: '22px',
+});
+
+const cardLogoStyle = css({
+  width: '36px',
+  height: '22px',
+});
+
+const cardContentStyle = css({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '8px',
+});
+
+const cardDetailStyle = css({
+  height: '20px',
+  color: '#ffffff',
+  fontSize: '14px',
+  lineHeight: '20px',
+  letterSpacing: 'inherit',
+  whiteSpace: 'pre-wrap',
+});
+
+const cardNumberGridStyle = css({
+  display: 'grid',
+  gap: '10px',
+  gridTemplateColumns: 'repeat(4, 1fr)',
+  justifyContent: 'center',
+});
 
 interface CardImageType {
   cardNumber: string[];
@@ -14,40 +68,20 @@ interface CardImageType {
 interface CardImageTableType {
   masterCard: string;
   visa: string;
-  noneImage: string;
+  domesticCard: string;
 }
 
 function CardImage({ cardNumber, cardPeriod, cardOwner }: CardImageType) {
-  const cardBrandType = (): CardBrandType => {
-    const startNumber = Number(cardNumber[0].substring(0, 2));
-    if (cardNumber[0][0] === CARD_INFORMATION.visa) {
-      return cardBrand.visa;
-    }
-    if (!isRange(startNumber, CARD_INFORMATION.masterCard.min, CARD_INFORMATION.masterCard.max)) {
-      return cardBrand.masterCard;
-    }
-    return cardBrand.noneImage;
-  };
-
   const getCardImage = () => {
     const cardImageTable: CardImageTableType = {
       masterCard: MASTERCARD,
       visa: VISA,
-      noneImage: '',
+      domesticCard: '',
     };
-    return cardImageTable[cardBrandType()];
+    return cardImageTable[checkCardBrand(cardNumber)];
   };
 
   const imageUrl = getCardImage();
-
-  const displayNumber = () => {
-    return cardNumber.map((value: string, index: number) => {
-      if (index === 2 || index === 3) {
-        return '*'.repeat(value.length);
-      }
-      return value;
-    });
-  };
 
   const monthFormat = (month: string) => {
     const monthNumber = Number(month);
@@ -73,9 +107,11 @@ function CardImage({ cardNumber, cardPeriod, cardOwner }: CardImageType) {
         {/* 컨텐츠 */}
         <div css={cardContentStyle}>
           <div css={[cardDetailStyle, cardNumberGridStyle]}>
-            {displayNumber().map((numbers, index) => {
-              return <p key={index}>{numbers}</p>;
-            })}
+            {formatCardDisplayNumber(cardNumber, [CARD_DISPLAY_INDEX.third, CARD_DISPLAY_INDEX.fourth]).map(
+              (numbers, index) => {
+                return <p key={index}>{numbers}</p>;
+              },
+            )}
           </div>
           <p css={cardDetailStyle}>{periodFormat(cardPeriod[0], cardPeriod[1])}</p>
           <p css={cardDetailStyle}>{cardOwner}</p>
@@ -84,59 +120,5 @@ function CardImage({ cardNumber, cardPeriod, cardOwner }: CardImageType) {
     </>
   );
 }
-
-const cardContainerStyle = css`
-  background-color: #333333;
-  width: 212px;
-  height: 132px;
-  border-radius: 4px;
-  box-sizing: border-box;
-  box-shadow: 3px 3px 5px 0px;
-  padding: 8px 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  margin: 0 auto;
-`;
-
-const cardHeaderStyle = css`
-  display: flex;
-  justify-content: space-between;
-`;
-
-const cardIcStyle = css`
-  background-color: #ddcd78;
-  border-radius: 4px;
-  width: 36px;
-  height: 22px;
-`;
-
-const cardLogoStyle = css`
-  width: 36px;
-  height: 22px;
-`;
-
-const cardContentStyle = css`
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-`;
-
-const cardDetailStyle = css`
-  height: 20px;
-
-  color: #ffffff;
-  font-size: 14px;
-  line-height: 20px;
-  letter-spacing: inherit;
-  white-space: pre-wrap;
-`;
-
-const cardNumberGridStyle = css`
-  display: grid;
-  gap: 10px;
-  grid-template-columns: repeat(4, 1fr);
-  justify-content: center;
-`;
 
 export default CardImage;

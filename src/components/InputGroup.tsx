@@ -3,34 +3,52 @@ import InputTitle from './InputTitle';
 import Input from './Input';
 import { useState } from 'react';
 import ErrorMessage from './ErrorMessage';
-import { SectionType, period } from '../types/cardType';
+import { informationSectionType, period } from '../types/card';
 import { CARD_NUMBER, CARD_OWNER, CARD_PERIOD } from '../constants/inputInformation';
+import { CARD_DISPLAY_INDEX } from '../constants/cardInformation';
+
+const inputGroupStyle = css({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '16px',
+});
+
+const inputTitleStyle = css({
+  display: 'flex',
+  flexDirection: 'column',
+});
+
+const labelStyle = css({
+  fontSize: '12px',
+  color: '#0a0d13',
+});
+
+const inputContainerStyle = css({
+  display: 'flex',
+  gap: '8px',
+  flexDirection: 'column',
+  width: '100%',
+});
+
+const inputBoxStyle = css({
+  display: 'flex',
+  gap: '10px',
+});
 
 interface InputGroupType {
-  setState: React.Dispatch<React.SetStateAction<string[]>>;
-  section: SectionType;
+  setState: (value: string, index: number) => void;
+  informationSection: informationSectionType;
 }
 
-function InputGroup({ setState, section }: InputGroupType) {
-  const getType = (section: SectionType) => {
-    const getTypeTable = {
-      number: CARD_NUMBER,
-      period: CARD_PERIOD,
-      owner: CARD_OWNER,
-    };
-    return getTypeTable[section];
+function InputGroup({ setState, informationSection }: InputGroupType) {
+  const getTypeTable = {
+    number: CARD_NUMBER,
+    period: CARD_PERIOD,
+    owner: CARD_OWNER,
   };
 
-  const { title, subtitle, label, placeholders } = getType(section);
-  const [errorMessage, setErrorMessage] = useState<string>('');
-
-  const updateState = (value: string, index: number) => {
-    setState((prevState: string[]) => {
-      const updatedState = [...prevState];
-      updatedState[index] = value;
-      return updatedState;
-    });
-  };
+  const { title, subtitle, label, placeholders } = getTypeTable[informationSection];
+  const [errorMessage, setErrorMessage] = useState('');
 
   return (
     <div css={inputGroupStyle}>
@@ -39,19 +57,19 @@ function InputGroup({ setState, section }: InputGroupType) {
       </div>
 
       <div css={inputContainerStyle}>
-        <label css={labelStyle} htmlFor={section}>
+        <label css={labelStyle} htmlFor={informationSection}>
           {label}
         </label>
         <div css={inputBoxStyle}>
           {placeholders.map((placeholder: string, index: number) => {
-            const isPassword = index === 2 || index === 3;
+            const isPassword = index === CARD_DISPLAY_INDEX.third || index === CARD_DISPLAY_INDEX.fourth;
             return (
               <Input
                 isPassword={isPassword}
-                keyProp={section + index.toString()}
-                type={section === 'period' ? period[index] : section}
+                key={index}
+                informationDetail={informationSection === 'period' ? period[index] : informationSection}
                 placeholder={placeholder}
-                setState={(s) => updateState(s, index)}
+                setState={(value) => setState(value, index)}
                 setErrorMessage={setErrorMessage}
               />
             );
@@ -62,33 +80,5 @@ function InputGroup({ setState, section }: InputGroupType) {
     </div>
   );
 }
-
-const inputGroupStyle = css`
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-`;
-
-const inputTitleStyle = css`
-  display: flex;
-  flex-direction: column;
-`;
-
-const labelStyle = css`
-  font-size: 12px;
-  color: #0a0d13;
-`;
-
-const inputContainerStyle = css`
-  display: flex;
-  gap: 8px;
-  flex-direction: column;
-  width: 100%;
-`;
-
-const inputBoxStyle = css`
-  display: flex;
-  gap: 10px;
-`;
 
 export default InputGroup;

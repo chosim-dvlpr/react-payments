@@ -4,45 +4,77 @@ import './reset.css';
 import InputGroup from './components/InputGroup';
 import CardImage from './components/CardImage';
 import { css } from '@emotion/react';
+import { informationSectionType } from './types/card';
+
+const appContainerStyle = css({
+  display: 'flex',
+  flexDirection: 'column',
+  justifyContent: 'center',
+  alignItems: 'start',
+  padding: '31px',
+  gap: '45px',
+  width: '376px',
+});
+
+const appStyle = css({
+  width: '100%',
+  display: 'flex',
+  flexDirection: 'column',
+  justifyContent: 'center',
+  alignItems: 'center',
+});
+
+const appInputStyle = css({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '16px',
+  width: '100%',
+});
+
+interface HandleCardInputType {
+  value: string;
+  index: number;
+  inputSection: informationSectionType;
+}
 
 function App() {
-  const [cardNumber, setCardNumber] = useState<string[]>(['']);
-  const [cardPeriod, setCardPeriod] = useState<string[]>(['']);
-  const [cardOwner, setCardOwner] = useState<string[]>(['']);
+  const [cardNumber, setCardNumber] = useState(['', '', '', '']);
+  const [cardPeriod, setCardPeriod] = useState(['', '']);
+  const [cardOwner, setCardOwner] = useState(['']);
 
-  const appContainerStyle = css`
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: start;
-    padding: 31px;
-    gap: 45px;
-    width: 376px;
-  `;
+  const setStateFunctions: { [key: string]: React.Dispatch<React.SetStateAction<string[]>> } = {
+    number: setCardNumber,
+    period: setCardPeriod,
+    owner: setCardOwner,
+  };
 
-  const appStyle = css`
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-  `;
+  const handleCardInput = ({ value, index, inputSection }: HandleCardInputType) => {
+    const setStateFunction = setStateFunctions[inputSection];
 
-  const appInputStyle = css`
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    width: 100%;
-  `;
+    setStateFunction((prevState) => {
+      const updatedState = [...prevState];
+      updatedState[index] = value;
+      return updatedState;
+    });
+  };
 
   return (
     <div css={appStyle}>
       <div css={appContainerStyle}>
         <CardImage cardNumber={cardNumber} cardPeriod={cardPeriod} cardOwner={cardOwner} />
         <form css={appInputStyle}>
-          <InputGroup setState={setCardNumber} section="number" />
-          <InputGroup setState={setCardPeriod} section="period" />
-          <InputGroup setState={setCardOwner} section="owner" />
+          <InputGroup
+            setState={(value: string, index: number) => handleCardInput({ value, index, inputSection: 'number' })}
+            informationSection="number"
+          />
+          <InputGroup
+            setState={(value: string, index: number) => handleCardInput({ value, index, inputSection: 'period' })}
+            informationSection="period"
+          />
+          <InputGroup
+            setState={(value: string, index: number) => handleCardInput({ value, index, inputSection: 'owner' })}
+            informationSection="owner"
+          />
         </form>
       </div>
     </div>
