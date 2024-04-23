@@ -1,10 +1,9 @@
 import { css } from '@emotion/react';
 import { MASTERCARD, VISA } from '../assets';
-import { isRange } from '../util/isRange';
-import { VALIDATION } from '../constants/validation';
 import checkCardBrand from '../util/checkCardBrand';
 import formatCardDisplayNumber from '../util/formatCardDisplayNumber';
 import { CARD_DISPLAY_INDEX } from '../constants/cardInformation';
+import formatValue from '../util/formatValue';
 
 const cardContainerStyle = css({
   backgroundColor: '#333333',
@@ -61,8 +60,8 @@ const cardNumberGridStyle = css({
 
 interface CardImageType {
   cardNumber: string[];
-  cardPeriod: string[];
-  cardOwner: string[];
+  cardPeriod: { month: string; year: string };
+  cardOwner: string;
 }
 
 interface CardImageTableType {
@@ -83,41 +82,26 @@ function CardImage({ cardNumber, cardPeriod, cardOwner }: CardImageType) {
 
   const imageUrl = getCardImage();
 
-  const monthFormat = (month: string) => {
-    const monthNumber = Number(month);
-    if (month && !isRange(monthNumber, VALIDATION.singleDigit.min, VALIDATION.singleDigit.max)) {
-      return '0'.repeat(2 - month.length) + month;
-    }
-    return month;
-  };
-
-  const periodFormat = (month: string, year: string) => {
-    if (month) return [monthFormat(month), year].join('/');
-  };
-
   return (
-    <>
-      {/* 카드 배경 영역 */}
-      <div css={cardContainerStyle}>
-        {/* 헤더 */}
-        <div css={cardHeaderStyle}>
-          <div css={cardIcStyle}></div>
-          {imageUrl && <img src={imageUrl} css={cardLogoStyle} />}
-        </div>
-        {/* 컨텐츠 */}
-        <div css={cardContentStyle}>
-          <div css={[cardDetailStyle, cardNumberGridStyle]}>
-            {formatCardDisplayNumber(cardNumber, [CARD_DISPLAY_INDEX.third, CARD_DISPLAY_INDEX.fourth]).map(
-              (numbers, index) => {
-                return <p key={index}>{numbers}</p>;
-              },
-            )}
-          </div>
-          <p css={cardDetailStyle}>{periodFormat(cardPeriod[0], cardPeriod[1])}</p>
-          <p css={cardDetailStyle}>{cardOwner}</p>
-        </div>
+    <div css={cardContainerStyle}>
+      {/* 헤더 */}
+      <div css={cardHeaderStyle}>
+        <div css={cardIcStyle}></div>
+        {imageUrl && <img src={imageUrl} css={cardLogoStyle} />}
       </div>
-    </>
+      {/* 컨텐츠 */}
+      <div css={cardContentStyle}>
+        <div css={[cardDetailStyle, cardNumberGridStyle]}>
+          {formatCardDisplayNumber(cardNumber, [CARD_DISPLAY_INDEX.third, CARD_DISPLAY_INDEX.fourth]).map(
+            (numbers, index) => {
+              return <p key={index}>{numbers}</p>;
+            },
+          )}
+        </div>
+        <p css={cardDetailStyle}>{formatValue.periodFormat(cardPeriod.month, cardPeriod.year)}</p>
+        <p css={cardDetailStyle}>{cardOwner}</p>
+      </div>
+    </div>
   );
 }
 
