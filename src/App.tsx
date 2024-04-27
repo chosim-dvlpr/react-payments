@@ -18,7 +18,7 @@ const appStyle = css({
 function App() {
   return (
     <div css={appStyle}>
-      <BrowserRouter>
+      <BrowserRouter basename={process.env.PUBLIC_URL}>
         <Routes>
           <Route path="/" element={<CardRegister />}></Route>
           <Route path="/completed" element={<CardRegisterCompleted />}></Route>
