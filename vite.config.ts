@@ -8,5 +8,5 @@ export default defineConfig({
       jsxImportSource: '@emotion/react',
     }),
   ],
-  base: '/react-payments/dist/',
+  base: '/react-payments/dist',
 });
